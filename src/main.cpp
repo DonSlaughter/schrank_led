@@ -16,6 +16,12 @@ void setup(){
 }
 
 void loop(){
+    //TODO
+    /*
+    PIR for Movement
+    Photodiode for Measuring the Light
+    Calculating best Timeduration for the Lights, maybe in Comparrision to the light intensity
+       */
     lights_on();
     delay(1000);
     lights_off();
