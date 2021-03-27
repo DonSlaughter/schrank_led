@@ -5,6 +5,12 @@
 #define CHIPSET WS2812B
 CRGB leds[NUM_LEDS];
 
+#define PIR_PIN 4
+#define LED_PIN 2
+int movement;
+unsigned long time;
+unsigned long movement_time;
+
 // Prototypes of functions, implementation at the end
 void lights_on();
 // turns the light smoth on
@@ -12,7 +18,11 @@ void lights_off();
 // turns the light smoth off
 
 void setup(){
-    FastLED.addLeds<CHIPSET, 2>(leds, NUM_LEDS);
+    Serial.begin(9600);
+    pinMode(PIR_PIN, INPUT);
+    FastLED.addLeds<CHIPSET, LED_PIN>(leds, NUM_LEDS);
+    FastLED.setBrightness(0);
+    FastLED.show();
 }
 
 void loop(){
@@ -22,10 +32,31 @@ void loop(){
     Photodiode for Measuring the Light
     Calculating best Timeduration for the Lights, maybe in Comparrision to the light intensity
        */
-    lights_on();
-    delay(1000);
-    lights_off();
-    delay(1000);
+    movement = digitalRead(PIR_PIN);
+    if (movement == HIGH) {
+	Serial.println("Movement Detected");
+	time = millis();
+	movement_time = millis();
+	Serial.println("Turning Lights on");
+	lights_on();
+	Serial.println("Lights on");
+	while (movement_time < time + 1000){
+	    movement = digitalRead(PIR_PIN);
+	    if (movement == HIGH) {
+		movement_time = millis();
+	    }
+	    time = millis();
+	    Serial.print("Movement: ");
+	    Serial.println(movement);
+	    Serial.print("Last movement: ");
+	    Serial.println(movement_time);
+	    Serial.print("Time: ");
+	    Serial.println(time);
+	}
+	Serial.println("Turning Lights off");
+	lights_off();
+	Serial.println("Lights off");
+    }
 }
 
 void lights_on(){
@@ -33,7 +64,7 @@ void lights_on(){
 	FastLED.setBrightness(i);
     	fill_solid(leds, NUM_LEDS, CRGB::Blue);
     	FastLED.show();
-	delay (5);
+	delay (10);
     }
 }
 void lights_off(){
@@ -41,6 +72,6 @@ void lights_off(){
 	FastLED.setBrightness(i);
     	fill_solid(leds, NUM_LEDS, CRGB::Blue);
     	FastLED.show();
-	delay (5);
+	delay (10);
     }
 }
