@@ -38,7 +38,6 @@ bool movement_detected();
 bool light_intensity_check(uint16_t);
 uint16_t light_threshold = 500;
 
-//global variables
 unsigned long movement_timer, countdown;
 // how long should the light be active
 uint16_t active_time = 10000;
