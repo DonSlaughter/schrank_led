@@ -81,6 +81,8 @@ uint8_t lights_off(uint8_t){
 }
 
 bool movement_detected(){
+	//the PIR Sensor sends the HIGH signal around 4 Seconds, its not a short peak
+	//4 Seconds is is smallest time frame to get from my sensor.
 	int movement;
 	movement = digitalRead(PIR_PIN);
 	if (movement == HIGH) {
