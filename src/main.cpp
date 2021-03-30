@@ -10,14 +10,15 @@ CRGB leds[NUM_LEDS];
 int PHOTO_PIN = A0;
 
 // Prototypes of functions, implementation at the end
-uint8_t lights_on(uint8_t led_intensity);
 // turns the light smoth on
-uint8_t lights_off(uint8_t led_intensity);
-// turns the light smoth off
-bool movement_detected();
+uint8_t lights_on(uint8_t);
+// turns the light smoth off, but exits if new movement is detected
+uint8_t lights_off(uint8_t);
 // returns true if the PIR Sensor detects a movement
-uint8_t check_light_intensity();
-uint8_t light_intensity;
+bool movement_detected();
+// returns true if the photo resistor goes below light_threshold
+bool light_intensity_check(uint16_t);
+uint16_t light_threshold = 500;
 
 //global variables
 unsigned long movement_timer, countdown;
@@ -34,13 +35,13 @@ void setup(){
 }
 
 void loop(){
-	light_intensity = check_light_intensity();
-	if (movement_detected() == true && light_intensity < 100) {
+	if (movement_detected() && light_intensity_check(light_threshold) ) {
 		led_intensity = lights_on(led_intensity);
 		movement_timer = millis();
 		countdown = millis();
 		while (countdown <= movement_timer + active_time){
 			if (movement_detected() == true){
+				Serial.println("New movement detected, reseting timer");
 				movement_timer = millis();
 			}
 			countdown = millis();
@@ -49,10 +50,10 @@ void loop(){
 	}
 }
 
-uint8_t lights_on(uint8_t led_intensity){
+uint8_t lights_on(uint8_t){
 	Serial.println("Turning light on");
 	while (led_intensity < 255){
-		led_intensity = ++led_intensity;
+		led_intensity++ ;
 		FastLED.setBrightness(led_intensity);
 		fill_solid(leds, NUM_LEDS, CRGB::Blue);
 		FastLED.show();
@@ -62,10 +63,10 @@ uint8_t lights_on(uint8_t led_intensity){
 	return led_intensity;
 }
 
-uint8_t lights_off(uint8_t led_intensity){
+uint8_t lights_off(uint8_t){
 	Serial.println("Turning light off");
 	while (led_intensity > 0){
-		led_intensity = --led_intensity;
+		led_intensity-- ;
 		FastLED.setBrightness(led_intensity);
 		fill_solid(leds, NUM_LEDS, CRGB::Blue);
 		FastLED.show();
@@ -91,8 +92,13 @@ bool movement_detected(){
 	}
 }
 
-uint8_t check_light_intensity(){
-	uint8_t photo_resistance = analogRead(PHOTO_PIN);
-	//Serial.println(photo_resistance);
-	return photo_resistance;
+bool light_intensity_check(uint16_t){
+	uint16_t photo_resistance = analogRead(PHOTO_PIN);
+	Serial.println(photo_resistance);
+	if (photo_resistance < light_threshold){
+		return true;
+	}
+	else {
+		return false;
+	}
 }
