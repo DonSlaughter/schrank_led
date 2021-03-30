@@ -7,21 +7,23 @@ CRGB leds[NUM_LEDS];
 
 #define PIR_PIN 4
 #define LED_PIN 2
+int PHOTO_PIN = A0;
 
 // Prototypes of functions, implementation at the end
-int lights_on(int led_intensity);
+uint8_t lights_on(uint8_t led_intensity);
 // turns the light smoth on
-int lights_off(int led_intensity);
+uint8_t lights_off(uint8_t led_intensity);
 // turns the light smoth off
 bool movement_detected();
 // returns true if the PIR Sensor detects a movement
-int light_intensity();
+uint8_t check_light_intensity();
+uint8_t light_intensity;
 
 //global variables
 unsigned long movement_timer, countdown;
 // how long should the light be active
-int active_time = 1000;
-int led_intensity = 0;
+uint16_t active_time = 10000;
+uint8_t led_intensity = 0;
 
 void setup(){
 	Serial.begin(9600);
@@ -32,13 +34,8 @@ void setup(){
 }
 
 void loop(){
-	//TODO
-	/*
-	PIR for Movement
-	Photodiode for Measuring the Light
-	Calculating best Timeduration for the Lights, maybe in Comparrision to the light intensity
-	*/
-	if (movement_detected() == true) {
+	light_intensity = check_light_intensity();
+	if (movement_detected() == true && light_intensity < 100) {
 		led_intensity = lights_on(led_intensity);
 		movement_timer = millis();
 		countdown = millis();
@@ -52,10 +49,10 @@ void loop(){
 	}
 }
 
-int lights_on(int led_intensity){
+uint8_t lights_on(uint8_t led_intensity){
 	Serial.println("Turning light on");
-	for (; led_intensity <= 255; led_intensity ++){
-		Serial.println(led_intensity);
+	while (led_intensity < 255){
+		led_intensity = ++led_intensity;
 		FastLED.setBrightness(led_intensity);
 		fill_solid(leds, NUM_LEDS, CRGB::Blue);
 		FastLED.show();
@@ -65,18 +62,21 @@ int lights_on(int led_intensity){
 	return led_intensity;
 }
 
-int lights_off(int led_intensity){
+uint8_t lights_off(uint8_t led_intensity){
 	Serial.println("Turning light off");
-	for (; led_intensity >= 0; led_intensity --){
-		Serial.println(led_intensity);
-		if (movement_detected() == true) break;	//break out from turning off if new movement is detected
+	while (led_intensity > 0){
+		led_intensity = --led_intensity;
 		FastLED.setBrightness(led_intensity);
 		fill_solid(leds, NUM_LEDS, CRGB::Blue);
 		FastLED.show();
 		delay (10);
+		if (movement_detected()) {
+			return led_intensity;
+			break;	//break out from turning off if new movement is detected
+		}
 	}
 	Serial.println("Lights off");
-	return led_intensity;
+	return 0;
 }
 
 bool movement_detected(){
@@ -91,6 +91,8 @@ bool movement_detected(){
 	}
 }
 
-int light_intensity(){
-	//TODO
+uint8_t check_light_intensity(){
+	uint8_t photo_resistance = analogRead(PHOTO_PIN);
+	//Serial.println(photo_resistance);
+	return photo_resistance;
 }
