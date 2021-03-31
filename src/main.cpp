@@ -112,6 +112,9 @@ bool movement_detected(){
 	}
 }
 
+//TODO
+//needs to be rewritten to return an int. The light should no be allways on
+//full brightness. In Darkness it shuold be lower
 bool light_intensity_check(uint16_t){
 	uint16_t photo_resistance = analogRead(PHOTO_PIN);
 	Serial.println(photo_resistance);
