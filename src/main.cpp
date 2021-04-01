@@ -67,6 +67,11 @@ void loop(){
 	}
 }
 
+//TODO
+//sleepmode without hardware interrupt
+//should check every minute if light intensity is above threshold, if yes slepp
+//till next check, if not wait for movement and then turn lights on
+
 uint8_t lights_on(uint8_t){
 	Serial.println("Turning light on");
 	while (led_intensity < 255){
