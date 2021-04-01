@@ -25,7 +25,7 @@ CRGB leds[NUM_LEDS];
 
 #define PIR_PIN 4
 #define LED_PIN 2
-int PHOTO_PIN = A0;
+#define PHOTO_PIN A0
 
 // Prototypes of functions, implementation at the end
 // turns the light smoth on
