@@ -19,7 +19,7 @@
 #include "Arduino.h"
 #include "FastLED.h"
 
-#define NUM_LEDS 16
+#define NUM_LEDS 81
 #define CHIPSET WS2812B
 CRGB leds[NUM_LEDS];
 
@@ -36,16 +36,17 @@ uint8_t lights_off(uint8_t);
 bool movement_detected();
 // returns true if the photo resistor goes below light_threshold
 bool light_intensity_check(uint16_t);
-uint16_t light_threshold = 500;
+uint16_t light_threshold = 850;
 
 unsigned long movement_timer, countdown;
 // how long should the light be active
-uint16_t active_time = 10000;
+uint16_t active_time = 5000;
 uint8_t led_intensity = 0;
 
 void setup(){
 	Serial.begin(9600);
 	pinMode(PIR_PIN, INPUT);
+	pinMode(PHOTO_PIN, INPUT);
 	FastLED.addLeds<CHIPSET, LED_PIN>(leds, NUM_LEDS);
 	FastLED.setBrightness(0);
 	FastLED.show();
@@ -66,11 +67,6 @@ void loop(){
 		led_intensity = lights_off(led_intensity);
 	}
 }
-
-//TODO
-//sleepmode without hardware interrupt
-//should check every minute if light intensity is above threshold, if yes slepp
-//till next check, if not wait for movement and then turn lights on
 
 uint8_t lights_on(uint8_t){
 	Serial.println("Turning light on");
@@ -122,7 +118,7 @@ bool movement_detected(){
 bool light_intensity_check(uint16_t){
 	uint16_t photo_resistance = analogRead(PHOTO_PIN);
 	Serial.println(photo_resistance);
-	if (photo_resistance < light_threshold){
+	if (photo_resistance > light_threshold){
 		return true;
 	}
 	else {
